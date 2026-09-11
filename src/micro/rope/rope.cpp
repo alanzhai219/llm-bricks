@@ -1,18 +1,15 @@
 #include "micro/rope.hpp"
-
-namespace llm_bricks::detail {
-Status rope_ref(TensorView x, const RopeParams& params);
-}
+#include "rope_ref.hpp"
 
 namespace llm_bricks {
 
-Status rope(Context& context, TensorView x, const RopeParams& params) {
+Status rope(Context& context, const RopeParams& params) {
     if (context.device.type != DeviceType::cpu) return Status::unsupported;
 
     switch (context.backend) {
     case Backend::automatic:
     case Backend::reference:
-        return detail::rope_ref(x, params);
+        return detail::rope_ref(params);
     case Backend::avx2:
     case Backend::avx512:
     case Backend::cuda:

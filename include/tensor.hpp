@@ -109,6 +109,11 @@ struct Tensor {
     }
 
     // access raw data
+    template <typename T>
+    T* data_as() {
+        return static_cast<T*>(m_data);
+    }
+
     void* ptr() {
         return m_data;
     }

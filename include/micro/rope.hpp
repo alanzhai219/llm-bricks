@@ -19,6 +19,6 @@ struct RopeParams {
 };
 
 // Applies in-place rotary position embeddings to a contiguous f32 [B, H, S, D] tensor.
-[[nodiscard]] Status rope(Context& context, const RopeParams& params = {});
+[[nodiscard]] Status rope(Context& context, const RopeParams& params);
 
 } // namespace llm_bricks
