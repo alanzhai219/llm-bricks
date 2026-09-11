@@ -150,15 +150,15 @@ struct Tensor {
         return m_shape;
     }
 
-    const DType dtype() const {
+    DType dtype() const {
         return m_dtype;
     }
 
-    const size_t ndims() const {
+    size_t ndims() const {
         return m_shape.size();
     }
 
-    const size_t dim(size_t idx) const {
+    size_t dim(size_t idx) const {
         assert(idx < m_shape.size());
         return m_shape[idx];
     }

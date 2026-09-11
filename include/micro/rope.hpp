@@ -10,7 +10,7 @@ namespace llm_bricks {
 
 struct RopeParams {
     // inputs
-    Tensor x;
+    Tensor& x;
     // outputs
     // parameters
     float base = 10000.0F;

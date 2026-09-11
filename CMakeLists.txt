@@ -11,6 +11,7 @@ if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
 endif()
 
 option(LLMBRICKS_INSTALL "Enable installation" ON)
+option(LLMBRICKS_BUILD_TESTS "Build tests" ON)
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/install" CACHE PATH "Install path" FORCE)
@@ -25,6 +26,11 @@ add_library(llm_bricks::llm_bricks ALIAS llm_bricks)
 target_include_directories(llm_bricks PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_features(llm_bricks PUBLIC cxx_std_17)
 target_compile_options(llm_bricks PRIVATE -Wall -Wextra -Wpedantic)
+
+if(LLMBRICKS_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(test)
+endif()
 
 if(LLMBRICKS_INSTALL)
     install(TARGETS llm_bricks
