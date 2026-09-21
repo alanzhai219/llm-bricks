@@ -9,7 +9,6 @@
 #include <stdexcept>
 #include <cstring>
 
-#include "device.hpp"
 #include "dtype.hpp"
 
 namespace llm_bricks {
@@ -23,6 +22,13 @@ static size_t compute_numel(const std::vector<size_t>& shape) {
 }
 
 struct Tensor {
+    Tensor() {
+        m_data = nullptr;
+        m_shape = {};
+        m_stride = {};
+        m_dtype = DType::unknown;
+
+    }
     Tensor(const std::vector<size_t>& shape, DType dtype = DType::f32) : m_shape(shape), m_dtype(dtype) {
         compute_strides();
         switch (m_dtype) {

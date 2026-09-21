@@ -33,10 +33,13 @@ int test_rope_ref() {
     llm_bricks::Tensor x({1, 1, 2, 4});
     setup_rope_test_data(x);
 
-    llm_bricks::RopeParams params{x, 10000.0F, 4, true};
+    llm_bricks::RopeParams params = {x, 10000.0F, 4, true};
+
     llm_bricks::Context context;
+    auto rope_obj = llm_bricks::Rope(context);
+    rope_obj.set_input(params);
     // runtime check
-    CHECK(llm_bricks::rope(context, params) == llm_bricks::Status::ok);
+    CHECK(rope_obj.infer() == llm_bricks::Status::ok);
 
     llm_bricks::Tensor expected({1, 1, 2, 4});
     setup_expected_result(expected);

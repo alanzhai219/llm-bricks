@@ -4,7 +4,7 @@
 
 namespace llm_bricks::detail {
 
-Status rope_ref(const RopeParams& params) {
+Status rope_ref(RopeParams& params) {
     Tensor& x = params.x;
     if (x.ptr() == nullptr || x.dtype() != DType::f32 || x.ndims() != 4 || params.base <= 0.0F) {
         return Status::invalid_argument;

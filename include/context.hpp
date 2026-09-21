@@ -18,6 +18,26 @@ enum class Backend {
 };
 
 struct Context {
+    Context() = default;
+    virtual ~Context() {}
+    Context(const Context& ctx) {
+        device = ctx.device;
+        backend = ctx.backend;
+    }
+    Context(Context&& ctx) {
+        device = ctx.device;
+        backend = ctx.backend;
+    }
+    Context& operator=(const Context& ctx) {
+        device = ctx.device;
+        backend = ctx.backend;
+        return *this;
+    }
+    Context& operator=(Context&& ctx) {
+        device = ctx.device;
+        backend = ctx.backend;
+        return *this;
+    }
     DeviceType device = DeviceType::cpu;
     Backend backend = Backend::automatic;
 };

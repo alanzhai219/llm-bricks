@@ -3,17 +3,22 @@
 
 namespace llm_bricks {
 
-Status rope(Context& context, const RopeParams& params) {
-    if (context.device != DeviceType::cpu) {
+Status Rope::infer() {
+    if (m_ctx.device != DeviceType::cpu) {
         return Status::unsupported;
     }
+    if (m_params == nullptr) {
+        return Status::invalid_argument;
+    }
 
-    switch (context.backend) {
+    switch (m_ctx.backend) {
         case Backend::automatic:
         case Backend::reference:
-            return detail::rope_ref(params);
+            return detail::rope_ref(*m_params);
         case Backend::avx2:
+            return Status::unsupported;
         case Backend::avx512:
+            return Status::unsupported;
         case Backend::cuda:
             return Status::unsupported;
         case Backend::sycl:
