@@ -19,7 +19,12 @@ endif()
 
 add_library(llm_bricks SHARED
     src/runtime/context.cpp
+    src/micro/add/add.cpp
+    src/micro/gelu/gelu.cpp
+    src/micro/layer_norm/layer_norm.cpp
     src/micro/rope/rope.cpp
+    src/micro/scale/scale.cpp
+    src/micro/softmax/softmax.cpp
 )
 add_library(llm_bricks::llm_bricks ALIAS llm_bricks)
 
