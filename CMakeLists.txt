@@ -1,8 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
 
-set(LLMBRICKS_CXX_COMPILER "g++" CACHE STRING "C++ compiler")
-set(CMAKE_CXX_COMPILER "${LLMBRICKS_CXX_COMPILER}")
-
 project(llm_bricks VERSION 0.1.0 LANGUAGES CXX)
 
 # Use Release by default.
