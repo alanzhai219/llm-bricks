@@ -27,13 +27,13 @@ struct Tensor {
         m_shape = {};
         m_stride = {};
         m_dtype = DType::unknown;
-
     }
     Tensor(const std::vector<size_t>& shape, DType dtype = DType::f32) : m_shape(shape), m_dtype(dtype) {
         compute_strides();
         switch (m_dtype) {
             case DType::f32:
                 m_data = malloc(compute_numel(m_shape) * sizeof(float));
+                std::memset(m_data, 0, compute_numel(m_shape) * sizeof(float));
                 break;
             /*
             case DType::f16:
@@ -53,6 +53,20 @@ struct Tensor {
             default:
                 throw std::runtime_error("Tensor dtype must be specified");
         }
+    }
+
+    Tensor(const std::vector<size_t>& shape, float fill) : Tensor(shape) {
+        float* values = data();
+        for (size_t i = 0; i < numel(); ++i) {
+            values[i] = fill;
+        }
+    }
+
+    Tensor(const std::vector<size_t>& shape, const std::vector<float>& values) : Tensor(shape) {
+        if (numel() != values.size()) {
+            throw std::invalid_argument("Tensor: value count does not match shape");
+        }
+        std::memcpy(m_data, values.data(), values.size() * sizeof(float));
     }
     virtual ~Tensor() {
         free(m_data);
@@ -102,6 +116,9 @@ struct Tensor {
     // idx of vec: 0, 1, 2, ..., n-2, n-1
     void compute_strides() {
         m_stride.resize(m_shape.size()); 
+        if (m_shape.empty()) {
+            return;
+        }
         m_stride.back() = 1;
         for (size_t idx = m_shape.size() - 1; idx > 0; --idx) {
             m_stride[idx - 1] = m_stride[idx] * m_shape[idx];
@@ -120,31 +137,39 @@ struct Tensor {
         return static_cast<T*>(m_data);
     }
 
-    void* ptr() {
-        return m_data;
+    float* data() {
+        return data_as<float>();
     }
 
-    const void* ptr() const {
-        return m_data;
+    const float* data() const {
+        return static_cast<const float*>(m_data);
+    }
+
+    float* ptr() {
+        return data();
+    }
+
+    const float* ptr() const {
+        return data();
     }
 
     // access tensor data by index
-    void* ptr(size_t i, size_t j, size_t k, size_t l) {
+    float* ptr(size_t i, size_t j, size_t k, size_t l) {
         assert(m_shape.size() == 4);
         const size_t offset = i * m_stride[0] + j * m_stride[1] + k * m_stride[2] + l * m_stride[3];
-        return static_cast<uint8_t*>(m_data) + offset;
+        return data() + offset;
     }
 
-    void* ptr(size_t i, size_t j, size_t k) {
+    float* ptr(size_t i, size_t j, size_t k) {
         assert(m_shape.size() == 3);
         const size_t offset = i * m_stride[0] + j * m_stride[1] + k * m_stride[2];
-        return static_cast<uint8_t*>(m_data) + offset;
+        return data() + offset;
     }
 
-    void* ptr(size_t i, size_t j) {
+    float* ptr(size_t i, size_t j) {
         assert(m_shape.size() == 2);
         const size_t offset = i * m_stride[0] + j * m_stride[1];
-        return static_cast<uint8_t*>(m_data) + offset; 
+        return data() + offset;
     }
 
     // access shape
@@ -187,6 +212,33 @@ struct Tensor {
             num *= v;
         }
         return num;
+    }
+
+    float& at(size_t i, size_t j, size_t k, size_t l) {
+        return *ptr(i, j, k, l);
+    }
+
+    float& at(size_t i, size_t j, size_t k) {
+        return *ptr(i, j, k);
+    }
+
+    float& at(size_t i, size_t j) {
+        return *ptr(i, j);
+    }
+
+    float at(size_t i, size_t j, size_t k, size_t l) const {
+        assert(m_shape.size() == 4);
+        return data()[i * m_stride[0] + j * m_stride[1] + k * m_stride[2] + l * m_stride[3]];
+    }
+
+    float at(size_t i, size_t j, size_t k) const {
+        assert(m_shape.size() == 3);
+        return data()[i * m_stride[0] + j * m_stride[1] + k * m_stride[2]];
+    }
+
+    float at(size_t i, size_t j) const {
+        assert(m_shape.size() == 2);
+        return data()[i * m_stride[0] + j * m_stride[1]];
     }
 
 private:
