@@ -1,4 +1,5 @@
 #include "micro/gelu.hpp"
+#include "gelu_avx2.hpp"
 #include "gelu_ref.hpp"
 
 namespace llm_bricks {
@@ -12,6 +13,7 @@ Status Gelu::infer() {
     switch (m_ctx.backend) {
     case Backend::automatic:
     case Backend::reference: return detail::gelu_ref(*m_params);
+    case Backend::avx2: return detail::gelu_avx2(*m_params);
     default: return Status::unsupported;
     }
 }

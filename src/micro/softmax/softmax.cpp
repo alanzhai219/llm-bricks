@@ -1,4 +1,5 @@
 #include "micro/softmax.hpp"
+#include "softmax_avx2.hpp"
 #include "softmax_ref.hpp"
 
 namespace llm_bricks {
@@ -12,6 +13,7 @@ Status Softmax::infer() {
     switch (m_ctx.backend) {
     case Backend::automatic:
     case Backend::reference: return detail::softmax_ref(*m_params);
+    case Backend::avx2: return detail::softmax_avx2(*m_params);
     default: return Status::unsupported;
     }
 }
