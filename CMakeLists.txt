@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.20)
 
 project(llm_bricks VERSION 0.1.0 LANGUAGES CXX)
 
+find_package(OpenMP REQUIRED COMPONENTS CXX)
+
 # Use Release by default.
 if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
@@ -28,6 +30,7 @@ add_library(llm_bricks::llm_bricks ALIAS llm_bricks)
 target_include_directories(llm_bricks PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_features(llm_bricks PUBLIC cxx_std_17)
 target_compile_options(llm_bricks PRIVATE -Wall -Wextra -Wpedantic)
+target_link_libraries(llm_bricks PUBLIC OpenMP::OpenMP_CXX)
 
 if(LLMBRICKS_BUILD_TESTS)
     enable_testing()

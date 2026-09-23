@@ -4,7 +4,7 @@
 #include <cstddef>
 #include <omp.h>
 
-namespace parallel {
+namespace llm_bricks {
 
 // 小 workload 不启动 OpenMP。
 // 这个值最终应该通过 benchmark 调整。
@@ -89,4 +89,4 @@ inline void parallel_nt(int nthr, const F& func) {
     }
 }
 
-} // namespace parallel
+} // namespace llm_bricks  
