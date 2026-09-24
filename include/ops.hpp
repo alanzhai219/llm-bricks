@@ -6,3 +6,4 @@
 #include "micro/rope.hpp"
 #include "micro/scale.hpp"
 #include "micro/softmax.hpp"
+#include "micro/matmul.hpp"
