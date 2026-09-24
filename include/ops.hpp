@@ -7,3 +7,4 @@
 #include "micro/scale.hpp"
 #include "micro/softmax.hpp"
 #include "micro/matmul.hpp"
+#include "micro/gemv.hpp"
