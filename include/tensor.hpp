@@ -241,6 +241,13 @@ struct Tensor {
         return data()[i * m_stride[0] + j * m_stride[1]];
     }
 
+    void randomize() {
+        float* values = data();
+        for (size_t i = 0; i < numel(); ++i) {
+            values[i] = static_cast<float>(rand()) / RAND_MAX;
+        }
+    }
+
 private:
   void* m_data;
   std::vector<size_t> m_shape;
