@@ -19,6 +19,7 @@ enum class Backend {
 
 struct Context {
     Context() = default;
+    Context(DeviceType dt, Backend be) : device(dt), backend(be) {}
     virtual ~Context() {}
     Context(const Context& ctx) {
         device = ctx.device;
