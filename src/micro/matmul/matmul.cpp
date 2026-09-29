@@ -1,5 +1,6 @@
 #include "micro/matmul.hpp"
 #include "matmul_ref.hpp"
+#include "matmul_avx2.hpp"
 
 namespace llm_bricks {
 
@@ -18,8 +19,7 @@ Status MatMul::infer() {
         case Backend::reference:
             return detail::matmul_ref(*m_params);
         case Backend::avx2:
-            // Implement AVX2 optimized matrix multiplication here
-            return Status::unsupported;
+            return detail::matmul_avx2(*m_params); // Assuming 2D matmul for AVX2
         case Backend::avx512:
             // Implement AVX512 optimized matrix multiplication here
             return Status::unsupported;
