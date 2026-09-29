@@ -21,6 +21,7 @@ add_library(llm_bricks SHARED
     src/micro/add/add.cpp
     src/micro/gelu/gelu.cpp
     src/micro/layer_norm/layer_norm.cpp
+    src/micro/matmul/matmul.cpp
     src/micro/rope/rope.cpp
     src/micro/scale/scale.cpp
     src/micro/softmax/softmax.cpp

@@ -7,6 +7,7 @@
 
 namespace llm_bricks {
 struct GemvParams : public BaseParams {
+    explicit GemvParams(Tensor& in_a, float* in_b, Tensor& out) : input_a(in_a), input_b(in_b), output(out) {}
     Tensor& input_a;
     float* input_b;
     Tensor& output;
