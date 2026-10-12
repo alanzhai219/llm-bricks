@@ -43,13 +43,17 @@ Status matmul_2d_ref(const MatMulParams& params) {
         return Status::invalid_argument;
     }
 
+    const float* a_ptr = a.ptr();
+    const float* b_ptr = b.ptr();
+    float* c_ptr = c.ptr();
     for (size_t i = 0; i < m; ++i) {
-        for (size_t j = 0; j < n; ++j) {
-            float sum = 0.0f;
-            for (size_t p = 0; p < k; ++p) {
-                sum += a.at(i, p) * b.at(p, j);
+        for (size_t p = 0; p < k; ++p) {
+            const float av = a_ptr[i * k + p];
+            const float* b_row = b_ptr + p * n;
+            float* c_row = c_ptr + i * n;
+            for (size_t j = 0; j < n; ++j) {
+                c_row[j] += av * b_row[j];
             }
-            c.at(i, j) = sum;
         }
     }
 
@@ -74,14 +78,18 @@ Status matmul_3d_ref(const MatMulParams& params) {
         return Status::invalid_argument;
     }
 
+    const float* a_ptr = a.ptr();
+    const float* b_ptr = b.ptr();
+    float* c_ptr = c.ptr();
     for (size_t h = 0; h < batch; ++h) {
         for (size_t i = 0; i < m; ++i) {
-            for (size_t j = 0; j < n; ++j) {
-                float sum = 0.0f;
-                for (size_t p = 0; p < k; ++p) {
-                    sum += a.at(h, i, p) * b.at(h, p, j);
+            for (size_t p = 0; p < k; ++p) {
+                const float av = a_ptr[(h * m + i) * k + p];
+                const float* b_row = b_ptr + (h * k + p) * n;
+                float* c_row = c_ptr + (h * m + i) * n;
+                for (size_t j = 0; j < n; ++j) {
+                    c_row[j] += av * b_row[j];
                 }
-                c.at(h, i, j) = sum;
             }
         }
     }
