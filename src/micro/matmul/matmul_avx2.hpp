@@ -22,28 +22,51 @@ constexpr size_t NR = 16;  // register block size for N dimension
 __attribute__((target("avx2,fma")))
 inline void micro_kernel_avx2_6x16(const float* Ap, const float* Bp, float* C,
                                     size_t kc, size_t mc, size_t nc, size_t ldc) {
-    __m256 lo[MR], hi[MR];
-    for (size_t i = 0; i < MR; ++i) {
-        lo[i] = _mm256_loadu_ps(C + i * ldc);
-        hi[i] = _mm256_loadu_ps(C + i * ldc + 8);
-    }
+    // Two YMM accumulators per row: columns 0..7 and 8..15.
+    __m256 ymm_c00 = _mm256_loadu_ps(C + 0 * ldc); __m256 ymm_c01 = _mm256_loadu_ps(C + 0 * ldc + 8);
+    __m256 ymm_c10 = _mm256_loadu_ps(C + 1 * ldc); __m256 ymm_c11 = _mm256_loadu_ps(C + 1 * ldc + 8);
+    __m256 ymm_c20 = _mm256_loadu_ps(C + 2 * ldc); __m256 ymm_c21 = _mm256_loadu_ps(C + 2 * ldc + 8);
+    __m256 ymm_c30 = _mm256_loadu_ps(C + 3 * ldc); __m256 ymm_c31 = _mm256_loadu_ps(C + 3 * ldc + 8);
+    __m256 ymm_c40 = _mm256_loadu_ps(C + 4 * ldc); __m256 ymm_c41 = _mm256_loadu_ps(C + 4 * ldc + 8);
+    __m256 ymm_c50 = _mm256_loadu_ps(C + 5 * ldc); __m256 ymm_c51 = _mm256_loadu_ps(C + 5 * ldc + 8);
 
     for (size_t p = 0; p < kc; ++p) {
         const float* a = Ap + p * mc;
         const float* b = Bp + p * nc;
-        const __m256 b_lo = _mm256_loadu_ps(b);
-        const __m256 b_hi = _mm256_loadu_ps(b + 8);
-        for (size_t i = 0; i < MR; ++i) {
-            const __m256 av = _mm256_set1_ps(a[i]);
-            lo[i] = _mm256_fmadd_ps(av, b_lo, lo[i]);
-            hi[i] = _mm256_fmadd_ps(av, b_hi, hi[i]);
-        }
+        const __m256 ymm_b0 = _mm256_loadu_ps(b);
+        const __m256 ymm_b1 = _mm256_loadu_ps(b + 8);
+
+        __m256 ymm_a = _mm256_set1_ps(a[0]);
+        ymm_c00 = _mm256_fmadd_ps(ymm_a, ymm_b0, ymm_c00);
+        ymm_c01 = _mm256_fmadd_ps(ymm_a, ymm_b1, ymm_c01);
+
+        ymm_a = _mm256_set1_ps(a[1]);
+        ymm_c10 = _mm256_fmadd_ps(ymm_a, ymm_b0, ymm_c10);
+        ymm_c11 = _mm256_fmadd_ps(ymm_a, ymm_b1, ymm_c11);
+
+        ymm_a = _mm256_set1_ps(a[2]);
+        ymm_c20 = _mm256_fmadd_ps(ymm_a, ymm_b0, ymm_c20);
+        ymm_c21 = _mm256_fmadd_ps(ymm_a, ymm_b1, ymm_c21);
+
+        ymm_a = _mm256_set1_ps(a[3]);
+        ymm_c30 = _mm256_fmadd_ps(ymm_a, ymm_b0, ymm_c30);
+        ymm_c31 = _mm256_fmadd_ps(ymm_a, ymm_b1, ymm_c31);
+
+        ymm_a = _mm256_set1_ps(a[4]);
+        ymm_c40 = _mm256_fmadd_ps(ymm_a, ymm_b0, ymm_c40);
+        ymm_c41 = _mm256_fmadd_ps(ymm_a, ymm_b1, ymm_c41);
+
+        ymm_a = _mm256_set1_ps(a[5]);
+        ymm_c50 = _mm256_fmadd_ps(ymm_a, ymm_b0, ymm_c50);
+        ymm_c51 = _mm256_fmadd_ps(ymm_a, ymm_b1, ymm_c51);
     }
 
-    for (size_t i = 0; i < MR; ++i) {
-        _mm256_storeu_ps(C + i * ldc, lo[i]);
-        _mm256_storeu_ps(C + i * ldc + 8, hi[i]);
-    }
+    _mm256_storeu_ps(C + 0 * ldc, ymm_c00); _mm256_storeu_ps(C + 0 * ldc + 8, ymm_c01);
+    _mm256_storeu_ps(C + 1 * ldc, ymm_c10); _mm256_storeu_ps(C + 1 * ldc + 8, ymm_c11);
+    _mm256_storeu_ps(C + 2 * ldc, ymm_c20); _mm256_storeu_ps(C + 2 * ldc + 8, ymm_c21);
+    _mm256_storeu_ps(C + 3 * ldc, ymm_c30); _mm256_storeu_ps(C + 3 * ldc + 8, ymm_c31);
+    _mm256_storeu_ps(C + 4 * ldc, ymm_c40); _mm256_storeu_ps(C + 4 * ldc + 8, ymm_c41);
+    _mm256_storeu_ps(C + 5 * ldc, ymm_c50); _mm256_storeu_ps(C + 5 * ldc + 8, ymm_c51);
 }
 
 // Scalar fringe kernel for a tile smaller than 6x16, with the same packed layout.
