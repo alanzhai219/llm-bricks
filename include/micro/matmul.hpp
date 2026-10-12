@@ -7,11 +7,13 @@
 
 namespace llm_bricks {
 struct MatMulParams : public BaseParams {
-    MatMulParams(const Tensor& a, const Tensor& b, Tensor& c) :
-        input_a(a), input_b(b), output(c) {}
+    MatMulParams(const Tensor& a, const Tensor& b, Tensor& c, bool transpose_a = false, bool transpose_b = false) :
+        input_a(a), input_b(b), output(c), transpose_a(transpose_a), transpose_b(transpose_b) {}
     const Tensor& input_a;
     const Tensor& input_b;
     Tensor& output;
+    bool transpose_a = false;
+    bool transpose_b = false;
 };
 
 class MatMul : public BaseOp {
