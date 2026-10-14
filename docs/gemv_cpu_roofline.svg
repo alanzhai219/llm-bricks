@@ -1,0 +1,45 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="700" viewBox="0 0 1080 700" role="img" aria-labelledby="title desc">
+  <title id="title">CPU FP32 GEMV Roofline 估计</title>
+  <desc id="desc">横轴为算术强度 FLOP/byte，纵轴为吞吐 GFLOP/s，均为对数刻度。22.39 GB/s 带宽线在算术强度 0.5 处对应 11.2 GFLOP/s。条件算力上限分别为 76.8 和 153.6 GFLOP/s。</desc>
+  <rect width="1080" height="700" rx="20" fill="#0f172a"/>
+  <text x="66" y="45" font-family="sans-serif" font-size="24" font-weight="700" fill="#f8fafc">CPU FP32 Roofline · GEMV</text>
+  <text x="66" y="71" font-family="sans-serif" font-size="14" fill="#94a3b8">单核示意估计 · 对数坐标 · 非实测 GEMV 性能</text>
+
+  <!-- x: 0.125 ... 32 FLOP/byte; y: 1 ... 256 GFLOP/s, both logarithmic. -->
+  <g stroke="#334155" stroke-width="1">
+    <path d="M100 110V590 M200 110V590 M300 110V590 M400 110V590 M500 110V590 M600 110V590 M700 110V590 M800 110V590 M900 110V590"/>
+    <path d="M100 590H900 M100 470H900 M100 350H900 M100 230H900 M100 110H900"/>
+  </g>
+  <path d="M100 110V590H900" fill="none" stroke="#cbd5e1" stroke-width="2"/>
+
+  <!-- Bandwidth = 22.39 GB/s. Compute ceiling: 1 x 256-bit FMA at 4.8 GHz. -->
+  <path d="M100 501 L578 214 H900" fill="none" stroke="#38bdf8" stroke-width="4" stroke-dasharray="10 7"/>
+  <!-- Bandwidth = 22.39 GB/s. Compute ceiling: conditional 2 x 256-bit FMA at 4.8 GHz. -->
+  <path d="M100 501 L678 154 H900" fill="none" stroke="#fb923c" stroke-width="5" stroke-linejoin="round"/>
+
+  <!-- GEMV AI = 0.5, P = 0.5 * 22.39 = 11.2 GFLOP/s. -->
+  <path d="M300 590V381 H100" fill="none" stroke="#4ade80" stroke-width="1.5" stroke-dasharray="4 5"/>
+  <circle cx="300" cy="381" r="8" fill="#4ade80" stroke="#0f172a" stroke-width="3"/>
+  <rect x="318" y="331" width="194" height="55" rx="8" fill="#1e293b"/>
+  <text x="330" y="353" font-family="sans-serif" font-size="15" font-weight="700" fill="#4ade80">GEMV: AI = 0.5</text>
+  <text x="330" y="375" font-family="sans-serif" font-size="14" fill="#e2e8f0">带宽上限 ≈ 11.2 GFLOP/s</text>
+
+  <text x="910" y="159" font-family="sans-serif" font-size="14" fill="#fb923c">153.6 GFLOP/s*</text>
+  <text x="910" y="219" font-family="sans-serif" font-size="14" fill="#38bdf8">76.8 GFLOP/s*</text>
+  <text x="460" y="279" font-family="sans-serif" font-size="14" fill="#fdba74" transform="rotate(-31 460 279)">带宽线：P = 22.39 × AI</text>
+  <text x="687" y="137" font-family="sans-serif" font-size="13" fill="#fdba74">交点 AI ≈ 6.86*</text>
+  <text x="544" y="198" font-family="sans-serif" font-size="13" fill="#7dd3fc">交点 AI ≈ 3.43*</text>
+
+  <g font-family="sans-serif" font-size="13" fill="#cbd5e1" text-anchor="middle">
+    <text x="100" y="612">0.125</text><text x="200" y="612">0.25</text><text x="300" y="612">0.5</text>
+    <text x="400" y="612">1</text><text x="500" y="612">2</text><text x="600" y="612">4</text>
+    <text x="700" y="612">8</text><text x="800" y="612">16</text><text x="900" y="612">32</text>
+  </g>
+  <g font-family="sans-serif" font-size="13" fill="#cbd5e1" text-anchor="end">
+    <text x="86" y="595">1</text><text x="86" y="475">4</text><text x="86" y="355">16</text>
+    <text x="86" y="235">64</text><text x="86" y="115">256</text>
+  </g>
+  <text x="500" y="645" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#f8fafc">算术强度 (FLOP/byte) →</text>
+  <text x="28" y="350" font-family="sans-serif" font-size="16" text-anchor="middle" fill="#f8fafc" transform="rotate(-90 28 350)">吞吐量 (GFLOP/s) →</text>
+  <text x="67" y="676" font-family="sans-serif" font-size="12" fill="#94a3b8">* 4.8 GHz 最高频率及每周期 1/2 条 FMA 的假设值；带宽来自 -k2 -e，可能包含 SMT 双线程。</text>
+</svg>
