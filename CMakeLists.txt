@@ -11,6 +11,7 @@ endif()
 
 option(LLMBRICKS_INSTALL "Enable installation" ON)
 option(LLMBRICKS_BUILD_TESTS "Build tests" ON)
+option(LLMBRICKS_BUILD_BENCHMARKS "Build operator benchmarks" OFF)
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/install" CACHE PATH "Install path" FORCE)
@@ -36,6 +37,10 @@ target_link_libraries(llm_bricks PUBLIC OpenMP::OpenMP_CXX)
 if(LLMBRICKS_BUILD_TESTS)
     enable_testing()
     add_subdirectory(test)
+endif()
+
+if(LLMBRICKS_BUILD_BENCHMARKS)
+    add_subdirectory(benchmark)
 endif()
 
 if(LLMBRICKS_INSTALL)
