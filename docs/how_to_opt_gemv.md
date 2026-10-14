@@ -110,3 +110,48 @@ Stream-triad like:       34133.8
 - AI: $\frac{2MKN}{4(MK+KN+MN)}$ FLOP/byte.
 
 对于GEMV来说，M=1，且A和C都是向量，可以忽略它们的数据流量。则AI约等于 $0.5$ FLOP/byte。
+
+### 大矩阵实测描点与理论对比
+
+- 使用单个逻辑 CPU、AVX2 后端且**未启用** `--perf` 的基准结果：
+    ```bash
+    taskset -c 2 ./benchmark/bench_ops --op matmul --shape 1,7680,30720 --backend avx2 --warmup 5 --iters 50
+    op=matmul shape=1,7680,30720 warmup=5 iters=50
+    min=46018.787 us  median=46133.991 us  mean=46222.141 us  output[0]=2878.781
+    ```
+
+- 这里是行向量 $[1,K]$ 乘权重矩阵 $[K,N]$，$K=7680$、$N=30720$；**不是 GPT-2 small 的实际层尺寸**，而是用于观察大于缓存时的 DRAM 行为。权重矩阵大小为
+    $4KN=943{,}718{,}400$ 字节 $=900$ MiB，大于本机的 24 MiB L3 缓存。以中位耗时 $t=46{,}133.991\ \mu\mathrm{s}\approx0.046134\ \mathrm{s}$ 计算：
+
+    $$
+        \begin{aligned}
+        F &= 2KN = 471{,}859{,}200\ \mathrm{FLOPs},\\
+        I &= \frac{2KN}{4(KN+K+N)}\approx0.500\ \mathrm{FLOP/byte},\\
+        P_{\mathrm{actual}} &= \frac{2KN}{t\times10^9}\approx10.23\ \mathrm{GFLOP/s},\\
+        B_{\mathrm{effective}} &= \frac{4KN}{t\times10^9}\approx20.46\ \mathrm{GB/s}.
+        \end{aligned}
+    $$
+
+- 在上面的 Roofline 图上，**实测点为 $(I,P)\approx(0.5,10.23)$**，即 $x=0.5$、$y$ 略高于 10 GFLOP/s。$B_{\mathrm{effective}}$ 是按矩阵大小推算的**表观读取带宽**，不是硬件计数器测得的 DRAM 流量。
+
+- 用前述 MLC 的 **22.39 GB/s** 只读带宽作为暂时参考，带宽约束下的吞吐上限与效率为：
+
+    $$
+        P_{\mathrm{roof}}\approx\min(22.39\times0.5,\ P_{\mathrm{compute}})
+        \approx11.20\ \mathrm{GFLOP/s},\qquad
+        \eta=\frac{P_{\mathrm{actual}}}{P_{\mathrm{roof}}}
+        \approx\frac{10.23}{11.20}\approx91\%.
+    $$
+
+- **42.15 ms 的来源**：只考虑从 DRAM 读取一次权重矩阵，按字节数除以带宽：
+
+    $$
+        t_{\min}\approx\frac{4KN}{B}
+        =\frac{943{,}718{,}400\ \mathrm{byte}}
+                     {22.39\times10^9\ \mathrm{byte/s}}
+        \approx0.04215\ \mathrm{s}=42.15\ \mathrm{ms}.
+    $$
+
+    MLC 使用十进制 GB/s（$10^9$ 字节/秒）；矩阵的 **900 MiB** 使用二进制单位，不能直接拿 $900/22.39$ 算毫秒。实际中位耗时为 **46.13 ms**，比该乐观下界高约 **3.98 ms**。下界忽略输入/输出流量与执行开销。
+
+- **不要把 91% 当作严格的单线程带宽利用率**：benchmark 固定在逻辑 CPU 2，而带宽 22.39 GB/s 来自 `-k2 -e`，可能用了该核心的全部硬件线程。应重新以 `-k2 -X -e` 测单硬件线程只读带宽，确认选中的硬件线程与绑核一致，再计算 $P_{\mathrm{roof}}=\min(BI,P_{\mathrm{compute}})$ 和 $\eta=P_{\mathrm{actual}}/P_{\mathrm{roof}}$。若矩阵可能命中缓存或核的运行频率发生变化，也要重新评估 Roofline 的适用条件。
