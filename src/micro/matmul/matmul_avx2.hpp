@@ -6,6 +6,8 @@
 
 #include "micro/matmul.hpp"
 
+#include "gemv_avx2_impl.hpp"
+
 namespace llm_bricks {
 namespace detail {
 
@@ -87,25 +89,6 @@ inline void micro_kernel_generic(const float* Ap, const float* Bp, float* C,
 }
 
 // Decode (M=1): stream the original row-major B without packing either operand.
-__attribute__((target("avx2,fma")))
-inline void matmul_row_avx2(const float* a, const float* b, float* c,
-                            size_t k, size_t n) {
-    const size_t vector_end = n & ~size_t{7};
-    for (size_t p = 0; p < k; ++p) {
-        const __m256 av = _mm256_set1_ps(a[p]);
-        const float* b_row = b + p * n;
-        size_t j = 0;
-        for (; j < vector_end; j += 8) {
-            const __m256 cv = _mm256_loadu_ps(c + j);
-            const __m256 bv = _mm256_loadu_ps(b_row + j);
-            _mm256_storeu_ps(c + j, _mm256_fmadd_ps(av, bv, cv));
-        }
-        for (; j < n; ++j) {
-            c[j] += a[p] * b_row[j];
-        }
-    }
-}
-
 void macro_kernel(const float* Ap, const float* Bp, float* C, size_t mc, size_t nc, size_t kc, size_t ldc) {
     for (size_t i = 0; i < mc; i += MR) {
         for (size_t j = 0; j < nc; j += NR) {
@@ -158,7 +141,7 @@ Status matmul_2d_avx2(const MatMulParams& params) {
     float* c_ptr = c.ptr();
 
     if (M == 1) {
-        matmul_row_avx2(a_ptr, b_ptr, c_ptr, K, N);
+        gemv_avx2_v1(a_ptr, b_ptr, c_ptr, K, N);
         return Status::ok;
     }
 
