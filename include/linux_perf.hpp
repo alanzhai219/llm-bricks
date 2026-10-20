@@ -33,6 +33,7 @@
 #include <utility>
 #include <vector>
 
+namespace llm_bricks {
 namespace LinuxPerf {
 
 using CounterValue = uint64_t;
@@ -1233,6 +1234,8 @@ inline int Init() {
 }
 
 }  // namespace LinuxPerf
+
+} // namespace llm_bricks
 
 // Use once at the beginning of a C++ scope. Destruction ends profiling.
 #define LINUX_PERF_PROFILE(title) \

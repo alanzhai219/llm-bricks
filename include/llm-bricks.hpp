@@ -7,3 +7,4 @@
 #include "status.hpp"
 #include "tensor.hpp"
 #include "ops.hpp"
+#include "linux_perf.hpp"
