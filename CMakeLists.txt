@@ -26,6 +26,7 @@ add_library(llm_bricks SHARED
     src/micro/rope/rope.cpp
     src/micro/scale/scale.cpp
     src/micro/softmax/softmax.cpp
+    src/micro/gemv/gemv.cpp
 )
 add_library(llm_bricks::llm_bricks ALIAS llm_bricks)
 

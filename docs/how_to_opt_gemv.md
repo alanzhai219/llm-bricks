@@ -155,3 +155,16 @@ Stream-triad like:       34133.8
     MLC 使用十进制 GB/s（$10^9$ 字节/秒）；矩阵的 **900 MiB** 使用二进制单位，不能直接拿 $900/22.39$ 算毫秒。实际中位耗时为 **46.13 ms**，比该乐观下界高约 **3.98 ms**。下界忽略输入/输出流量与执行开销。
 
 - **不要把 91% 当作严格的单线程带宽利用率**：benchmark 固定在逻辑 CPU 2，而带宽 22.39 GB/s 来自 `-k2 -e`，可能用了该核心的全部硬件线程。应重新以 `-k2 -X -e` 测单硬件线程只读带宽，确认选中的硬件线程与绑核一致，再计算 $P_{\mathrm{roof}}=\min(BI,P_{\mathrm{compute}})$ 和 $\eta=P_{\mathrm{actual}}/P_{\mathrm{roof}}$。若矩阵可能命中缓存或核的运行频率发生变化，也要重新评估 Roofline 的适用条件。
+
+## 理论性能
+```text
+gemv([vocab_size, n_embd], [n_embd]) => [vocab_size]
+```
+| index | shape | dtype | byte | MB |
+| --- | --- | --- | --- | --- |
+| src0 | [vocab_size, n_embd] = [50257, 768] | float32 | 154,664,064 | 147.4 |
+| src1 | [n_embd] = [768] | float32 | 3,072 | 0.0029 |
+| dst  | [vocab_size] = [50257] | float32 | 201,028 | 0.192 |
+
+考虑到`decode`阶段为`memory bound`，GEMV的性能主要受限于权重矩阵的读取带宽。
+那么，理论`gemv`耗时为 147.4 MB / 22.39 GB/s = 6.59 ms。

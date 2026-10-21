@@ -26,8 +26,8 @@ Status gemv_ref(const GemvParams &params) {
         return Status::invalid_argument;
     }
 
-    const float *a_data = static_cast<const float *>(input_a.ptr());
-    float *out_data = static_cast<float *>(output.ptr());
+    const float *a_data = input_a.ptr();
+    float *out_data = output.ptr();
 
     for (size_t i = 0; i < M; ++i) {
         out_data[i] = 0.0f;
@@ -35,6 +35,7 @@ Status gemv_ref(const GemvParams &params) {
             out_data[i] += a_data[i * N + j] * input_b[j];
         }
     }
+    // output.dump("gemv_ref_output.txt");
 
     return Status::ok; 
 }
