@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <string>
+#include <fstream>
 
 #include <cstddef>
 #include <cstdint>
@@ -245,6 +246,16 @@ struct Tensor {
         float* values = data();
         for (size_t i = 0; i < numel(); ++i) {
             values[i] = static_cast<float>(rand()) / RAND_MAX;
+        }
+    }
+
+    void dump(const std::string& file_name) const {
+        std::ofstream ofs(file_name, std::ios::binary);
+        if (!ofs) {
+            throw std::runtime_error("Failed to open file for dumping tensor: " + file_name);
+        }
+        for (size_t i = 0; i < numel(); ++i) {
+            ofs << data()[i] << "\n";
         }
     }
 
