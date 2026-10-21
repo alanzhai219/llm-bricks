@@ -1201,6 +1201,9 @@ ProfileScope make_profile_scope(const std::string& title,
                                 const std::string& category,
                                 int id,
                                 Values&&... values) {
+    if (!std::getenv("LINUX_PERF")) {
+        return ProfileScope();
+    }
     detail::CounterGroup& group = detail::CounterGroup::thread_instance();
     ProfileScope scope(&group, title, category, id);
     scope.set_extra_arguments(std::forward<Values>(values)...);
