@@ -168,3 +168,92 @@ gemv([vocab_size, n_embd], [n_embd]) => [vocab_size]
 
 考虑到`decode`阶段为`memory bound`，GEMV的性能主要受限于权重矩阵的读取带宽。
 那么，理论`gemv`耗时为 147.4 MB / 22.39 GB/s = 6.59 ms。
+
+## 实测性能
+
+- gemv: 26ms
+- arithmetic: 50257 * 768 * 2 = 77,168,256 FLOPs = 77.17 MFLOPs = 0.077 GFLOPs
+- arithmetic intensity: 0.077 GFLOPs / 147.4 MB = 0.00052 GFLOPs/MB = 0.52 MFLOPs/MB = 0.52 FLOPs/byte
+- performance: 0.077 GFLOPs / 0.026 s = 2.96 GFLOPs/s
+
+reference gemv point `[0.52, 2.96]` is below the roofline `[0.5, 11.2]`, which indicates that the performance is limited by memory bandwidth.
+
+![gemv reference perf](gemv_ref_perf.png)
+
+## 优化访存
+
+1. 参考代码和性能
+```cpp
+    for (size_t i = 0; i < M; ++i) {
+        out_data[i] = 0.0f;
+        for (size_t j = 0; j < N; ++j) {
+            out_data[i] += a_data[i * N + j] * input_b[j];
+        }
+    }
+```
+min=27026.781 us  median=27225.670 us  mean=27213.487 us  output[0]=-2.625
+
+2. 设置累加器为局部变量`acc`，避免每次循环都访问内存。
+```cpp
+    for (size_t i = 0; i < M; ++i) {
+        // out_data[i] = 0.0f;
+        float acc = 0.0F;
+        for (size_t j = 0; j < N; ++j) {
+            acc += a_data[i * N + j] * input_b[j];
+        }
+        out_data[i] = acc;
+    }
+```
+min=21351.581 us  median=22876.651 us  mean=22657.547 us  output[0]=-2.625
+
+3. 查看是否开启SIMD和FMA，如果没有则使用SIMD和FMA优化。
+使用指令级并行`#pragma omp simd`，并使用`reduction(+:acc)`来避免数据竞争。
+```cpp
+    for (size_t i = 0; i < M; ++i) {
+        // out_data[i] = 0.0f;
+        float acc = 0.0F;
+        #pragma omp simd reduction(+:acc)
+        for (size_t j = 0; j < N; ++j) {
+            acc += a_data[i * N + j] * input_b[j];
+        }
+        out_data[i] = acc;
+    }
+```
+min=7116.082 us  median=7152.854 us  mean=7149.991 us  output[0]=-2.625
+
+- performance: 0.077 GFLOPs / 7.15 ms = 10.77 GFLOPs/s
+
+4. 如果不使用`openmp`，则可以使用手写SIMD和FMA优化，使用`_mm256_loadu_ps`和`_mm256_fmadd_ps`来实现向量化。
+```cpp
+    for (size_t i = 0; i < M; ++i) {
+        float acc = 0.0F;
+        size_t j = 0;
+        for (; j + 8 <= N; j += 8) {
+            __m256 a_vec = _mm256_loadu_ps(a_data + i * N + j);
+            __m256 b_vec = _mm256_loadu_ps(input_b + j);
+            __m256 c_vec = _mm256_fmadd_ps(a_vec, b_vec, _mm256_setzero_ps());
+            acc += _mm256_reduce_add_ps(c_vec);
+        }
+        for (; j < N; ++j) {
+            acc += a_data[i * N + j] * input_b[j];
+        }
+        out_data[i] = acc;
+    }
+```
+![accumulator performance](MTL-Pcore-FMA.png)
+
+- fma: latency: 4
+- fma: throughput: 0.5
+- accumulator number = 4 / 0.5 = 8
+
+5. 线程级并行
+```cpp
+#pragma omp parallel for schedule(static)
+    for (size_t i = 0; i < M; ++i) {
+        float acc = 0.0F;
+        for (size_t j = 0; j < N; ++j) {
+            acc += a_data[i * N + j] * input_b[j];
+        }
+        out_data[i] = acc;
+    }
+```

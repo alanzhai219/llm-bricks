@@ -15,7 +15,8 @@ DRAM_GBPS = 22.39
 L3_GBPS = None
 L2_GBPS = None
 L1_GBPS = None
-POINTS = [("GEMV 7680x30720", 0.5, 10.23)]
+POINTS = [("GEMV 7680x30720", 0.5, 10.23),
+          ("GEMV REF 7680x30720", 0.52, 2.96)]
 OUTPUT = None
 
 def main():
