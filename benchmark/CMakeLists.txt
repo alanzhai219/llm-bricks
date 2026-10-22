@@ -7,5 +7,6 @@ add_executable(bench_ops
 	rope.cpp
 	scale.cpp
 	softmax.cpp
+	gemv.cpp
 )
 target_link_libraries(bench_ops PRIVATE llm_bricks::llm_bricks)

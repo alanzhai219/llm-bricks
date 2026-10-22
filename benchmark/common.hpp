@@ -51,7 +51,7 @@ void measure(const Options& options, const llm_bricks::Tensor& result, Setup set
         const auto start = std::chrono::steady_clock::now();
         if (options.perf) {
             setup();
-            auto scope = LinuxPerf::Profile(options.op, i);
+            auto scope = llm_bricks::LinuxPerf::Profile(options.op, i);
             run();
         } else {
             run();
@@ -69,7 +69,7 @@ void measure(const Options& options, const llm_bricks::Tensor& result, Setup set
 
     if (options.perf) {
         setup();
-        auto scope = LinuxPerf::Profile(options.op);
+        auto scope = llm_bricks::LinuxPerf::Profile(options.op);
         run();
     }
 }
@@ -81,5 +81,5 @@ void matmul(const Options& options);
 void rope(const Options& options);
 void scale(const Options& options);
 void softmax(const Options& options);
-
+void gemv(const Options& options);
 }  // namespace bench

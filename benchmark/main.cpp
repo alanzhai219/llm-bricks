@@ -102,6 +102,7 @@ int main(int argc, char** argv) {
         else if (options.op == "rope") bench::rope(options);
         else if (options.op == "scale") bench::scale(options);
         else if (options.op == "softmax") bench::softmax(options);
+        else if (options.op == "gemv") bench::gemv(options);
         else throw std::invalid_argument("unknown op: " + options.op);
     } catch (const std::exception& error) {
         std::cerr << "bench_ops: " << error.what() << '\n';
