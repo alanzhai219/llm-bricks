@@ -17,7 +17,7 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/install" CACHE PATH "Install path" FORCE)
 endif()
 
-add_library(llm_bricks SHARED
+add_library(llm_bricks STATIC
     src/runtime/context.cpp
     src/micro/add/add.cpp
     src/micro/gelu/gelu.cpp
