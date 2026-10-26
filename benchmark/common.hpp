@@ -14,6 +14,9 @@
 #include "status.hpp"
 #include "tensor.hpp"
 
+
+using namespace llm_bricks;
+
 namespace bench {
 
 struct Options {
