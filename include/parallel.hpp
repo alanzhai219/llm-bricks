@@ -2,7 +2,12 @@
 
 #include <algorithm>
 #include <cstddef>
+
+#if defined(LLMBRICKS_OMP_PARALLEL)
 #include <omp.h>
+#elif defined(LLMBRICKS_THREAD_PARALLEL)
+#include "threadpool.hpp"
+#endif
 
 namespace llm_bricks {
 
@@ -66,6 +71,7 @@ inline void splitter(T n, int team, int tid, T& start, T& end) {
 // work partition 由上层代码控制。
 // ============================================================
 
+#if defined(LLMBRICKS_OMP_PARALLEL)
 template <typename F>
 inline void parallel_nt(int nthr, const F& func) {
     if (nthr <= 0) {
@@ -89,4 +95,36 @@ inline void parallel_nt(int nthr, const F& func) {
     }
 }
 
-} // namespace llm_bricks  
+#elif defined(LLMBRICKS_THREAD_PARALLEL)
+template <typename F>
+inline void parallel_nt(int nthr, const F& func) {
+    if (nthr <= 0) {
+        nthr = std::thread::hardware_concurrency();
+    }
+
+    nthr = std::max(1, nthr);
+
+    if (nthr == 1) {
+        func(0, 1);
+        return;
+    }
+
+    ThreadPool pool(nthr);
+    for (int ithr = 0; ithr < nthr; ++ithr) {
+        pool.enqueue([ithr, nthr, &func]() {
+            func(ithr, nthr);
+        });
+    }
+}
+
+#else // RUN SERIALIZED
+template <typename F>
+inline void parallel_nt(int nthr, const F& func) {
+    for (int ithr = 0; ithr < nthr; ++ithr) {
+        func(ithr, nthr);
+    }
+}
+
+#endif
+
+} // namespace llm_bricks

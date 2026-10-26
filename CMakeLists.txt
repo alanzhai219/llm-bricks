@@ -12,6 +12,8 @@ endif()
 option(LLMBRICKS_INSTALL "Enable installation" ON)
 option(LLMBRICKS_BUILD_TESTS "Build tests" ON)
 option(LLMBRICKS_BUILD_BENCHMARKS "Build operator benchmarks" OFF)
+option(LLMBRICKS_OMP_PARALLEL "Building with openmp" OFF)
+option(LLMBRICKS_THREAD_PARALLEL "Building with thread pool" OFF)
 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX "${CMAKE_CURRENT_SOURCE_DIR}/install" CACHE PATH "Install path" FORCE)
@@ -32,7 +34,7 @@ add_library(llm_bricks::llm_bricks ALIAS llm_bricks)
 
 target_include_directories(llm_bricks PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_features(llm_bricks PUBLIC cxx_std_17)
-target_compile_options(llm_bricks PRIVATE -Wall -Wextra -Wpedantic)
+target_compile_options(llm_bricks PRIVATE -Wall -Wextra -Wpedantic -lpthread)
 target_link_libraries(llm_bricks PUBLIC OpenMP::OpenMP_CXX)
 
 if(LLMBRICKS_BUILD_TESTS)
