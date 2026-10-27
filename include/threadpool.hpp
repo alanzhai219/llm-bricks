@@ -1,6 +1,5 @@
 #pragma once
 
-#if defined(LLMBRICKS_THREAD_PARALLEL)
 #include <vector>
 #include <thread>
 #include <queue>
@@ -60,4 +59,3 @@ private:
 };
 
 }   // namespace llm_bricks
-#endif
