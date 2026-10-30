@@ -85,4 +85,5 @@ void rope(const Options& options);
 void scale(const Options& options);
 void softmax(const Options& options);
 void gemv(const Options& options);
+void token_embd(const Options& options);
 }  // namespace bench

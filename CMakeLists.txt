@@ -28,6 +28,9 @@ endif()
 
 add_library(llm_bricks STATIC
     src/runtime/context.cpp
+    ## ======== macro ops ========
+    src/macro/token_embd/token_embd.cpp
+    ## ======== micro ops ========
     src/micro/add/add.cpp
     src/micro/gelu/gelu.cpp
     src/micro/layer_norm/layer_norm.cpp

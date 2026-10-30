@@ -1,5 +1,8 @@
 add_executable(bench_ops
 	main.cpp
+	### ======= macro ops ========
+	token_embd.cpp
+	### ======== micro ops ========
 	add.cpp
 	gelu.cpp
 	layer_norm.cpp

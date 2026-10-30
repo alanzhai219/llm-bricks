@@ -11,6 +11,7 @@ enum class DeviceType {
 enum class Backend {
     automatic,
     reference,
+    x86_opt,
     avx2,
     avx512,
     cuda,

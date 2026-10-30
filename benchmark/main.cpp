@@ -10,7 +10,7 @@
 namespace {
 
 void usage() {
-    std::cout << "Usage: bench_ops --op add|gelu|layer_norm|matmul|rope|scale|softmax "
+    std::cout << "Usage: bench_ops --op add|gelu|layer_norm|matmul|rope|scale|softmax|gemv|token_embd "
                  "[--shape D1,D2,...] [--backend reference|automatic|avx2] "
                  "[--warmup N] [--iters N] [--perf]\n"
                  "  matmul shape: M,K,N or B,M,K,N (A=[M,K], B=[K,N])\n"
@@ -70,6 +70,7 @@ bench::Options parse_args(int argc, char** argv) {
             if (value == "reference") options.backend = llm_bricks::Backend::reference;
             else if (value == "automatic") options.backend = llm_bricks::Backend::automatic;
             else if (value == "avx2") options.backend = llm_bricks::Backend::avx2;
+            else if (value == "x86_opt") options.backend = llm_bricks::Backend::x86_opt;
             else throw std::invalid_argument("unknown backend: " + value);
         } else throw std::invalid_argument("unknown option: " + arg);
     }
@@ -103,6 +104,7 @@ int main(int argc, char** argv) {
         else if (options.op == "scale") bench::scale(options);
         else if (options.op == "softmax") bench::softmax(options);
         else if (options.op == "gemv") bench::gemv(options);
+        else if (options.op == "token_embd") bench::token_embd(options);
         else throw std::invalid_argument("unknown op: " + options.op);
     } catch (const std::exception& error) {
         std::cerr << "bench_ops: " << error.what() << '\n';
